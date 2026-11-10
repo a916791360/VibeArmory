@@ -181,20 +181,8 @@ public struct FloatingHUDView: View {
                     Image(nsImage: logoImg)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .frame(width: 26, height: 26)
-                        .clipShape(RoundedRectangle(cornerRadius: 6.5, style: .continuous))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 6.5, style: .continuous)
-                                .stroke(
-                                    LinearGradient(
-                                        colors: [Color.white.opacity(0.6), Color.white.opacity(0.1)],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    ),
-                                    lineWidth: 0.8
-                                )
-                        )
-                        .shadow(color: Color.black.opacity(0.35), radius: 4, x: 0, y: 2)
+                        .frame(width: 27, height: 27)
+                        .shadow(color: Color.black.opacity(0.28), radius: 3, x: 0, y: 1.5)
                 } else {
                     ZStack {
                         RoundedRectangle(cornerRadius: 7, style: .continuous)
@@ -384,10 +372,39 @@ public struct FloatingHUDView: View {
 
     private var footerView: some View {
         HStack {
-            HStack(spacing: 13) {
-                Label("切换", systemImage: "arrow.up.and.down")
-                Label("装弹", systemImage: "return")
-                Label("隐退", systemImage: "escape")
+            HStack(spacing: 14) {
+                // Keycap badge for arrows
+                HStack(spacing: 5) {
+                    Text("↑↓")
+                        .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 1.5)
+                        .background(Color.primary.opacity(0.06))
+                        .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
+                    Text("切换")
+                }
+
+                // Keycap badge for Return
+                HStack(spacing: 5) {
+                    Text("↵")
+                        .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 1.5)
+                        .background(Color.primary.opacity(0.06))
+                        .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
+                    Text("装弹")
+                }
+
+                // Keycap badge for Esc
+                HStack(spacing: 5) {
+                    Text("Esc")
+                        .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 1.5)
+                        .background(Color.primary.opacity(0.06))
+                        .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
+                    Text("隐退")
+                }
             }
             .font(.system(size: 11))
             .foregroundColor(.secondary)
