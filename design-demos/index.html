@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VibeArmory · 弹窗 UI 三方向高保真设计原型 (Huashu-Design)</title>
+  <style>
+    :root {
+      --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+      --font-mono: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      background: #0f1115;
+      color: #f0f3f6;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      user-select: none;
+    }
+
+    /* Top Control Bar */
+    .top-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(18, 20, 26, 0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .brand-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: rgba(94, 106, 210, 0.2);
+      color: #9da8ff;
+      border: 1px solid rgba(94, 106, 210, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .direction-pills {
+      display: flex;
+      background: rgba(0, 0, 0, 0.35);
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      gap: 4px;
+    }
+
+    .dir-btn {
+      background: transparent;
+      border: none;
+      color: #8a909d;
+      font-size: 12.5px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 9px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .dir-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .dir-btn.active {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    }
+
+    .dir-btn.dir-a.active {
+      background: #5E6AD2;
+      color: #fff;
+      box-shadow: 0 2px 14px rgba(94, 106, 210, 0.4);
+    }
+
+    .dir-btn.dir-b.active {
+      background: linear-gradient(135deg, #0071e3, #47a3ff);
+      color: #fff;
+      box-shadow: 0 2px 14px rgba(0, 113, 227, 0.35);
+    }
+
+    .dir-btn.dir-c.active {
+      background: #E58E1A;
+      color: #111;
+      font-weight: 700;
+      box-shadow: 0 2px 14px rgba(229, 142, 26, 0.35);
+    }
+
+    .wallpaper-toggle {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+      color: #888;
+    }
+
+    .wp-btn {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+    .wp-btn:hover { transform: scale(1.15); }
+    .wp-btn.active { border-color: #fff; }
+    .wp-dark { background: radial-gradient(circle at 50% 30%, #1e2230 0%, #0a0b0e 100%); }
+    .wp-sonoma { background: linear-gradient(135deg, #2b3a67 0%, #7d446a 50%, #c46853 100%); }
+    .wp-studio { background: radial-gradient(circle at 50% 50%, #222 0%, #111 100%); }
+
+    /* Canvas Stage */
+    .stage {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      position: relative;
+      transition: background 0.4s ease;
+    }
+
+    .stage.wp-dark-bg {
+      background: radial-gradient(circle at 50% 40%, #181c28 0%, #090a0d 100%);
+    }
+
+    .stage.wp-sonoma-bg {
+      background: radial-gradient(circle at 20% 30%, rgba(125, 68, 106, 0.6) 0%, transparent 60%),
+                  radial-gradient(circle at 80% 70%, rgba(196, 104, 83, 0.5) 0%, transparent 60%),
+                  #161c2e;
+    }
+
+    .stage.wp-studio-bg {
+      background: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #0a0a0a 100%);
+    }
+
+    /* Direction Header Info */
+    .direction-info-card {
+      max-width: 680px;
+      margin-bottom: 24px;
+      text-align: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .dir-badge-pill {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .dir-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      letter-spacing: -0.3px;
+    }
+
+    .dir-desc {
+      font-size: 13px;
+      color: #9da3af;
+      line-height: 1.5;
+    }
+
+    /* The Mock macOS Floating HUD */
+    .hud-window {
+      width: 640px;
+      height: 480px;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* ========================================================
+       DIRECTION A: LINEAR OBSIDIAN (黑曜石极客微光)
+       ======================================================== */
+    .hud-window.theme-a {
+      background: rgba(11, 13, 16, 0.94);
+      backdrop-filter: blur(40px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6),
+                  0 0 0 1px rgba(255, 255, 255, 0.06),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      color: #e6e8ec;
+    }
+
+    .theme-a .hud-header {
+      padding: 16px 20px 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .theme-a .hud-logo {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      letter-spacing: -0.5px;
+    }
+
+    .theme-a .hud-logo-icon {
+      color: #7b85f5;
+    }
+
+    .theme-a .search-box {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 9px;
+      padding: 7px 12px;
+      font-size: 13px;
+      color: #fff;
+      transition: all 0.15s ease;
+    }
+
+    .theme-a .search-box:focus-within {
+      background: rgba(255, 255, 255, 0.07);
+      border-color: #5E6AD2;
+      box-shadow: 0 0 0 3px rgba(94, 106, 210, 0.2);
+    }
+
+    .theme-a .search-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #fff;
+      font-size: 13px;
+      width: 100%;
+      font-family: var(--font-sans);
+    }
+
+    .theme-a .search-input::placeholder { color: #5a606d; }
+
+    .theme-a .nav-pills {
+      display: flex;
+      gap: 6px;
+      padding: 10px 20px;
+      overflow-x: auto;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .theme-a .nav-pill {
+      font-size: 11.5px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      color: #88909f;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+
+    .theme-a .nav-pill:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+
+    .theme-a .nav-pill.active {
+      background: rgba(94, 106, 210, 0.2);
+      color: #9da8ff;
+      border: 1px solid rgba(94, 106, 210, 0.4);
+    }
+
+    .theme-a .card-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .theme-a .card-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: transparent;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.12s ease;
+    }
+
+    .theme-a .card-item:hover {
+      background: rgba(255, 255, 255, 0.035);
+    }
+
+    .theme-a .card-item.selected {
+      background: rgba(94, 106, 210, 0.12);
+      border-color: rgba(94, 106, 210, 0.35);
+      box-shadow: inset 0 0 16px rgba(94, 106, 210, 0.08);
+    }
+
+    .theme-a .card-icon-box {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .theme-a .card-item.selected .card-icon-box {
+      background: #5E6AD2;
+      color: #fff;
+      border-color: transparent;
+    }
+
+    .theme-a .card-content {
+      flex: 1;
+    }
+
+    .theme-a .card-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #f0f2f5;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .theme-a .card-code-badge {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: #778092;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+
+    .theme-a .card-symptom {
+      font-size: 11.5px;
+      color: #788194;
+      margin-top: 2px;
+    }
+
+    .theme-a .card-action-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: #5E6AD2;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 2px 8px rgba(94, 106, 210, 0.3);
+    }
+
+    .theme-a .hud-footer {
+      padding: 10px 20px;
+      background: rgba(0, 0, 0, 0.3);
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #636b7b;
+      font-family: var(--font-mono);
+    }
+
+    /* ========================================================
+       DIRECTION B: APPLE LIQUID GLASS (2026 柔润高光原生)
+       ======================================================== */
+    .hud-window.theme-b {
+      background: rgba(36, 42, 54, 0.65);
+      backdrop-filter: blur(60px) saturate(210%);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-top: 1.5px solid rgba(255, 255, 255, 0.45);
+      border-radius: 24px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5),
+                  0 0 0 1px rgba(255, 255, 255, 0.08),
+                  inset 0 1px 1px rgba(255, 255, 255, 0.5);
+      color: #f7f9fc;
+    }
+
+    .theme-b .hud-header {
+      padding: 18px 22px 14px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .theme-b .hud-logo {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.4px;
+    }
+
+    .theme-b .search-box {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      padding: 9px 14px;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .theme-b .search-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #fff;
+      font-size: 13.5px;
+      width: 100%;
+    }
+    .theme-b .search-input::placeholder { color: rgba(255, 255, 255, 0.45); }
+
+    .theme-b .nav-pills {
+      display: flex;
+      gap: 8px;
+      padding: 0 22px 12px;
+      overflow-x: auto;
+    }
+
+    .theme-b .nav-pill {
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 12px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.7);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .theme-b .nav-pill.active {
+      background: #0071e3;
+      color: #fff;
+      font-weight: 600;
+      box-shadow: 0 3px 12px rgba(0, 113, 227, 0.4);
+    }
+
+    .theme-b .card-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .theme-b .card-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 16px;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .theme-b .card-item:hover {
+      background: rgba(255, 255, 255, 0.09);
+      transform: translateY(-1px);
+    }
+
+    .theme-b .card-item.selected {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.35);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.4);
+      transform: scale(1.008);
+    }
+
+    .theme-b .card-icon-box {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .theme-b .card-title {
+      font-size: 14.5px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .theme-b .card-symptom {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.65);
+      margin-top: 3px;
+    }
+
+    .theme-b .card-action-badge {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 20px;
+      background: #0071e3;
+      color: #fff;
+      box-shadow: 0 2px 10px rgba(0, 113, 227, 0.4);
+    }
+
+    .theme-b .hud-footer {
+      padding: 12px 22px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11.5px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* ========================================================
+       DIRECTION C: BRAUN TACTICAL ARMORY (迪特拉姆斯硬核军火库)
+       ======================================================== */
+    .hud-window.theme-c {
+      background: #17191C;
+      border: 2px solid #2B2F36;
+      border-radius: 14px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      color: #d1d5dc;
+      font-family: var(--font-sans);
+    }
+
+    .theme-c .hud-header {
+      padding: 14px 18px;
+      background: #1F2228;
+      border-bottom: 2px solid #2B2F36;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .theme-c .hud-logo {
+      font-size: 13px;
+      font-weight: 800;
+      color: #E58E1A;
+      font-family: var(--font-mono);
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .theme-c .led-indicator {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #00E676;
+      box-shadow: 0 0 8px #00E676;
+    }
+
+    .theme-c .search-box {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #111316;
+      border: 1px solid #363B44;
+      border-radius: 6px;
+      padding: 8px 12px;
+    }
+
+    .theme-c .search-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #f0f0f0;
+      font-size: 12.5px;
+      font-family: var(--font-mono);
+      width: 100%;
+    }
+    .theme-c .search-input::placeholder { color: #5a606d; }
+
+    .theme-c .nav-pills {
+      display: flex;
+      gap: 4px;
+      padding: 8px 18px;
+      background: #141619;
+      border-bottom: 1px solid #242830;
+      overflow-x: auto;
+    }
+
+    .theme-c .nav-pill {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: #1F232B;
+      border: 1px solid #2E3440;
+      color: #8c95a6;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .theme-c .nav-pill.active {
+      background: #E58E1A;
+      border-color: #E58E1A;
+      color: #111;
+      font-weight: 800;
+    }
+
+    .theme-c .card-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .theme-c .card-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 9px 12px;
+      border-radius: 6px;
+      background: #1A1D22;
+      border: 1px solid #262B33;
+      cursor: pointer;
+    }
+
+    .theme-c .card-item.selected {
+      background: #23272F;
+      border-color: #E58E1A;
+      box-shadow: inset 3px 0 0 #E58E1A;
+    }
+
+    .theme-c .card-icon-box {
+      width: 32px;
+      height: 32px;
+      border-radius: 5px;
+      background: #111316;
+      border: 1px solid #2A303A;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: #E58E1A;
+    }
+
+    .theme-c .card-item.selected .card-icon-box {
+      background: #E58E1A;
+      color: #111;
+    }
+
+    .theme-c .card-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #e2e5eb;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .theme-c .card-code-badge {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: #E58E1A;
+      background: rgba(229, 142, 26, 0.15);
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-weight: 700;
+    }
+
+    .theme-c .card-symptom {
+      font-size: 11px;
+      color: #7b8392;
+      margin-top: 2px;
+    }
+
+    .theme-c .card-action-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 800;
+      padding: 5px 12px;
+      border-radius: 4px;
+      background: #E58E1A;
+      color: #111;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .theme-c .hud-footer {
+      padding: 8px 18px;
+      background: #141619;
+      border-top: 2px solid #2B2F36;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 10.5px;
+      color: #6a7282;
+      font-family: var(--font-mono);
+    }
+
+    /* Inline Full Detail View Overlay */
+    .detail-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 50;
+      padding: 18px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      animation: slideInRight 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .theme-a .detail-overlay { background: rgba(11, 13, 16, 0.98); }
+    .theme-b .detail-overlay { background: rgba(30, 36, 48, 0.95); backdrop-filter: blur(50px); }
+    .theme-c .detail-overlay { background: #17191C; }
+
+    .detail-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12.5px;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.08);
+      border: none;
+      color: #fff;
+      padding: 5px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .detail-box {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 16px;
+      overflow-y: auto;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.6;
+      color: #cfd4dc;
+      white-space: pre-wrap;
+    }
+
+    /* Toast */
+    .toast-pill {
+      position: absolute;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 80;
+      background: rgba(16, 185, 129, 0.95);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 7px 16px;
+      border-radius: 20px;
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      animation: popIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes popIn {
+      0% { opacity: 0; transform: translate(-50%, -10px) scale(0.95); }
+      100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+    }
+
+    @keyframes slideInRight {
+      0% { opacity: 0; transform: translateX(20px); }
+      100% { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(6px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Side by Side Mode */
+    .grid-view {
+      display: none;
+      width: 100%;
+      max-width: 1920px;
+      gap: 32px;
+      justify-content: center;
+      padding: 30px;
+      flex-wrap: wrap;
+    }
+
+    .grid-view.active {
+      display: flex;
+    }
+
+    .single-view {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .single-view.hidden { display: none; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Global Bar -->
+  <header class="top-bar">
+    <div class="brand-title">
+      <span>⚡️ VibeArmory</span>
+      <span class="brand-badge">Huashu-Design 3方向评审</span>
+    </div>
+
+    <!-- Direction Switcher -->
+    <div class="direction-pills">
+      <button class="dir-btn dir-a active" onclick="switchDirection('a')">
+        <span>A · 极客黑曜石 (Linear)</span>
+      </button>
+      <button class="dir-btn dir-b" onclick="switchDirection('b')">
+        <span>B · 原生高光流 (Apple 2026)</span>
+      </button>
+      <button class="dir-btn dir-c" onclick="switchDirection('c')">
+        <span>C · 战术军火库 (Braun 工控)</span>
+      </button>
+      <button class="dir-btn" onclick="toggleGridView()">
+        <span>📐 三屏并排比对</span>
+      </button>
+    </div>
+
+    <!-- Background Wallpaper -->
+    <div class="wallpaper-toggle">
+      <span>桌面衬底：</span>
+      <button class="wp-btn wp-dark active" onclick="setWallpaper('dark')" title="深空微光"></button>
+      <button class="wp-btn wp-sonoma" onclick="setWallpaper('sonoma')" title="macOS 暮色"></button>
+      <button class="wp-btn wp-studio" onclick="setWallpaper('studio')" title="工作室纯暗"></button>
+    </div>
+  </header>
+
+  <!-- Stage -->
+  <main class="stage wp-dark-bg" id="stage">
+
+    <!-- Single Direction View -->
+    <div class="single-view" id="singleView">
+      <div class="direction-info-card" id="infoCard">
+        <!-- Dynamically injected -->
+      </div>
+
+      <!-- HUD Mockup Window Container -->
+      <div id="hudWindowMount">
+        <!-- Dynamic HUD inserted here -->
+      </div>
+    </div>
+
+    <!-- Multi Grid Comparison View -->
+    <div class="grid-view" id="gridView">
+      <!-- 3 HUDs rendered side-by-side -->
+    </div>
+
+  </main>
+
+  <script>
+    const PROMPTS_DATA = [
+      {
+        id: '01',
+        title: '第一性原理降维重构',
+        symptom: '功能改乱套了、到处打补丁、改了 A 坏了 B、屎山代码不敢碰',
+        category: '架构重构',
+        icon: '🧩',
+        code: 'WPN-01',
+        content: `立即停止在当前错误的逻辑上继续打补丁！我们已经陷入了典型的“局部修补破坏全局”的恶性循环。
+
+请运用【第一性原理（First Principles）】，放下所有的历史妥协和现有实现细节，把这个业务功能彻底拆回最底层的原子事实：
+
+### 第一阶段：事实与现状审计（严禁写代码）
+1. 调取并仔细分析当前工作区最近的所有 git diff 以及涉及该功能的文件；
+2. 区分【无法绕开的客观事实】与【此前随意妥协、未经验证的技术假设】；
+3. 明确指出：目前的代码中，哪些段落纯粹是为了修补前面引入的 bug 而叠加的“补丁垃圾代码”；
+4. 重新厘清这个功能最核心的用户旅程（User Journey）、关键输入、预期输出以及真实业务约束。
+
+### 第二阶段：推导纯粹架构
+1. 剥离所有表面修补，从零构建该功能最纯粹的状态机（State Machine）与单向数据流；
+2. 确保新路径下状态唯一、边界清晰、职责隔离，彻底消除状态冗余；
+3. 评估这次重构的最大爆炸半径（Blast Radius），明确指出哪些关联模块绝对不能被污染。
+
+### 第三阶段：输出方案与验证
+1. 明确列出你打算彻底废弃/删除的冗余逻辑；
+2. 给出干净、健壮、符合现代最佳实践的重构代码；
+3. 提供重构后的验证步骤：如何验证原有功能未被破坏，且顽疾彻底解决。`
+      },
+      {
+        id: '02',
+        title: '多维度专家会诊质询',
+        symptom: '方案犹豫不决、复杂问题容易顾此失彼、单兵思维容易埋隐患',
+        category: '排错会诊',
+        icon: '🩺',
+        code: 'WPN-02',
+        content: `先不要直接给出单一的代码方案。当前问题具有多维复杂性，单影视角极易埋下技术债或业务隐患。
+
+请你虚拟组织一个由 3 位互补的世界级专家组成的技术会诊委员会：
+- 专家 1：资深系统架构师（关注整体解耦、状态流动、可维护性与扩展边界）
+- 专家 2：防御性工程与稳定性专家（关注边界异常、竞态条件、内存/性能损耗与故障隔离）
+- 专家 3：极简主义首席产品/交互专家（关注用户体验闭环、交互阻力与认知直觉）
+
+请按严密流程各自建言，并展开激烈的专家交叉质询，最终综合三方博弈输出仲裁级方案！`
+      },
+      {
+        id: '03',
+        title: '爆炸半径防御性门禁',
+        symptom: 'AI 擅自修改无关文件、偷懒删除代码注释、引入随意的大范围改动',
+        category: '规范门禁',
+        icon: '🛡️',
+        code: 'WPN-03',
+        content: `紧急制动！你正在扩大本轮修改的【爆炸半径（Blast Radius）】。
+
+在接下来的代码修改中，必须严格执行防御性工程门禁：
+1. 范围冻结（Scope Freeze）：除了存在直接因果关系的这 1 个核心模块外，其余所有文件一律严禁擅自修改；
+2. 完整性保全（Integrity Protection）：完整保留现有所有代码注释与既有业务状态；
+3. 极小增量交付（Minimal Diff）：像微创手术一样只输出受影响的最小内聚代码。`
+      },
+      {
+        id: '04',
+        title: '视觉规范对齐与排毒',
+        symptom: 'AI 瞎写内联样式、色彩辣眼睛、间距错乱、无层级感、浓浓塑料感',
+        category: '视觉规范',
+        icon: '🎨',
+        code: 'WPN-04',
+        content: `先停下业务代码生成！当前界面的视觉表现极其粗糙，充斥着硬编码、不协调的比例与廉价的塑料感。
+
+请转换角色为一线大厂设计系统（Design System）设计主管与资深前端架构师：
+1. 深入扫描当前工作区已有的样式规范（全局 CSS 变量、Tailwind 配置、主题 Token）；
+2. 消除所有野生 Hex 颜色与无比例边距，严格绑定回语义变量；
+3. 补全优雅的 Hover 微反馈与微动效。`
+      },
+      {
+        id: '05',
+        title: '双向钢人论证技术抉择',
+        symptom: '面临二选一两难抉择（重构vs修补、方案A vs 方案B）无法决断',
+        category: '需求对齐',
+        icon: '⚖️',
+        code: 'WPN-05',
+        content: `先别急着给我二选一的轻率结论，也别默认我已经把选择的本质看清了。
+
+针对我们当前面临的两个互斥的技术/架构抉择路径，请为双方进行一次最严格的【双向钢人论证（Steelmanning）】：
+1. 用最客观的大白话重述真正的分歧；
+2. 分别为路径 A 和路径 B 寻找最不可辩驳的最强版本论据与杀手锏优势；
+3. 挖出双方潜藏的毒药与致命暗坑，向我提问一个最可能推翻某一方向的关键变量！`
+      }
+    ];
+
+    const DIRECTIONS_META = {
+      a: {
+        badge: '方向 A · 最佳设计师理念',
+        title: 'Linear 极客黑曜石 (Obsidian Cyber-Bento)',
+        desc: '借鉴 Studio Linear 与 Raycast：深黑底曜石、1px 发丝渐变光边框、冷蓝紫微光、等宽字体快捷键流，适合高专注力工程师。',
+        themeClass: 'theme-a'
+      },
+      b: {
+        badge: '方向 B · 现实参照物进化',
+        title: 'Apple 2026 Liquid Glass (柔润高光原生流)',
+        desc: '借鉴 Apple Design Awards 精品 Mac 原生应用：多层通透液体毛玻璃、环境高斯辉光、24px 柔角与物理悬浮凸起，温润优雅如工艺品。',
+        themeClass: 'theme-b'
+      },
+      c: {
+        badge: '方向 C · 军火库工业机械美学',
+        title: 'Braun 战术军火库标牌 (Tactical Armory Console)',
+        desc: '借鉴 Dieter Rams 工业极简主义：钛灰磨砂金属、LED 信号指示、战术明黄高反差标牌与机械扳机反馈，名副其实的“军火库”。',
+        themeClass: 'theme-c'
+      }
+    };
+
+    let currentDir = 'a';
+    let selectedIndex = 0;
+    let activeDetail = null;
+
+    function renderHUD(dirKey, isCompact = false) {
+      const meta = DIRECTIONS_META[dirKey];
+      return `
+        <div class="hud-window ${meta.themeClass}" id="hud_${dirKey}">
+          <!-- Header -->
+          <div class="hud-header">
+            <div class="hud-logo" style="display:flex; align-items:center; gap:8px;">
+              <img src="AppLogo.png" style="width:26px; height:26px; border-radius:6.5px; box-shadow:0 2px 8px rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.25); object-fit:cover;">
+              <span style="font-weight:700; letter-spacing:-0.2px">VibeArmory</span>
+            </div>
+            <div class="search-box">
+              <span>🔍</span>
+              <input type="text" class="search-input" placeholder="搜索痛点症状 (如: 样式、死循环、重构)..." oninput="handleSearch(this.value, '${dirKey}')">
+              <span style="font-size:10px; opacity:0.5; font-family:var(--font-mono)">⌥P</span>
+            </div>
+          </div>
+
+          <!-- Nav Pills -->
+          <div class="nav-pills">
+            <div class="nav-pill active">全部 (12)</div>
+            <div class="nav-pill">🧩 架构重构</div>
+            <div class="nav-pill">🩺 排错会诊</div>
+            <div class="nav-pill">🛡️ 规范门禁</div>
+            <div class="nav-pill">🎨 视觉规范</div>
+            <div class="nav-pill">⚖️ 需求对齐</div>
+          </div>
+
+          <!-- Cards List -->
+          <div class="card-list" id="cardList_${dirKey}">
+            ${PROMPTS_DATA.map((p, idx) => `
+              <div class="card-item ${idx === selectedIndex ? 'selected' : ''}" onclick="selectCard(${idx}, '${dirKey}')">
+                
+                <div class="card-content">
+                  <div class="card-title">
+                    <span>${p.title}</span>
+                    <span class="card-code-badge">${p.code}</span>
+                  </div>
+                  <div class="card-symptom">${p.symptom}</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <button style="background:none; border:none; cursor:pointer; color:inherit; opacity:0.6; font-size:14px" onclick="event.stopPropagation(); openDetail('${p.id}', '${dirKey}')" title="查看完整提示词">👁</button>
+                  ${idx === selectedIndex ? `
+                    <div class="card-action-badge" onclick="event.stopPropagation(); copyArmory('${p.title}')">
+                      <span>↵ 装弹</span>
+                    </div>
+                  ` : ''}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+
+          <!-- Footer -->
+          <div class="hud-footer">
+            <div style="display:flex; gap:12px;">
+              <span>↑↓ 导航</span>
+              <span>↵ 复制装弹</span>
+              <span>⎋ 隐退</span>
+            </div>
+            <div>就绪 12 款武器 · 零输入架构</div>
+          </div>
+
+          <!-- Detail Overlay Container -->
+          <div id="detailMount_${dirKey}"></div>
+          <div id="toastMount_${dirKey}"></div>
+        </div>
+      `;
+    }
+
+    function switchDirection(dir) {
+      currentDir = dir;
+      document.querySelectorAll('.dir-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector(`.dir-btn.dir-${dir}`)?.classList.add('active');
+
+      document.getElementById('gridView').classList.remove('active');
+      document.getElementById('singleView').classList.remove('hidden');
+
+      const meta = DIRECTIONS_META[dir];
+      document.getElementById('infoCard').innerHTML = `
+        <span class="dir-badge-pill" style="background:${dir === 'a' ? 'rgba(94,106,210,0.2)' : dir === 'b' ? 'rgba(0,113,227,0.2)' : 'rgba(229,142,26,0.2)'}; color:${dir === 'a' ? '#9da8ff' : dir === 'b' ? '#58a6ff' : '#E58E1A'}">${meta.badge}</span>
+        <h2 class="dir-title">${meta.title}</h2>
+        <p class="dir-desc">${meta.desc}</p>
+      `;
+
+      document.getElementById('hudWindowMount').innerHTML = renderHUD(dir);
+    }
+
+    function toggleGridView() {
+      document.querySelectorAll('.dir-btn').forEach(b => b.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+
+      document.getElementById('singleView').classList.add('hidden');
+      const grid = document.getElementById('gridView');
+      grid.classList.add('active');
+      grid.innerHTML = `
+        <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
+          <div style="font-size:14px; font-weight:700; color:#9da8ff;">A · Linear 极客黑曜石</div>
+          ${renderHUD('a', true)}
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
+          <div style="font-size:14px; font-weight:700; color:#58a6ff;">B · Apple 柔润高光原生流</div>
+          ${renderHUD('b', true)}
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
+          <div style="font-size:14px; font-weight:700; color:#E58E1A;">C · Braun 战术军火库工控标牌</div>
+          ${renderHUD('c', true)}
+        </div>
+      `;
+    }
+
+    function selectCard(idx, dirKey) {
+      selectedIndex = idx;
+      if (document.getElementById('singleView').classList.contains('hidden')) {
+        toggleGridView();
+      } else {
+        switchDirection(dirKey);
+      }
+    }
+
+    function openDetail(id, dirKey) {
+      const item = PROMPTS_DATA.find(p => p.id === id);
+      const mount = document.getElementById(`detailMount_${dirKey}`);
+      if (!mount) return;
+      mount.innerHTML = `
+        <div class="detail-overlay">
+          <div class="detail-header">
+            <button class="back-btn" onclick="closeDetail('${dirKey}')">← 返回武器列表 (Esc)</button>
+            <span style="font-size:11px; opacity:0.6; font-family:var(--font-mono)">零输入指令正文</span>
+          </div>
+          <div style="font-size:15px; font-weight:700">${item.title}</div>
+          <div class="detail-box">${item.content}</div>
+          <div style="display:flex; justify-content:flex-end; gap:10px;">
+            <button class="back-btn" onclick="closeDetail('${dirKey}')">关闭</button>
+            <button class="back-btn" style="background:#5E6AD2; color:#fff" onclick="copyArmory('${item.title}'); closeDetail('${dirKey}')">立即装弹并复制 (Enter)</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function closeDetail(dirKey) {
+      const mount = document.getElementById(`detailMount_${dirKey}`);
+      if (mount) mount.innerHTML = '';
+    }
+
+    function copyArmory(title) {
+      const toast = document.createElement('div');
+      toast.className = 'toast-pill';
+      toast.innerHTML = `<span>✓</span><span>已装弹 [${title}] 至剪贴板！</span>`;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 1600);
+    }
+
+    function setWallpaper(type) {
+      document.querySelectorAll('.wp-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector(`.wp-${type}`).classList.add('active');
+      const stage = document.getElementById('stage');
+      stage.className = `stage wp-${type}-bg`;
+    }
+
+    // Keyboard Shortcuts
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown') {
+        selectedIndex = Math.min(selectedIndex + 1, PROMPTS_DATA.length - 1);
+        switchDirection(currentDir);
+      } else if (e.key === 'ArrowUp') {
+        selectedIndex = Math.max(selectedIndex - 1, 0);
+        switchDirection(currentDir);
+      } else if (e.key === 'Enter') {
+        copyArmory(PROMPTS_DATA[selectedIndex].title);
+      } else if (e.key === 'Escape') {
+        closeDetail(currentDir);
+      }
+    });
+
+    // Initial Load
+    switchDirection('a');
+  </script>
+</body>
+</html>
