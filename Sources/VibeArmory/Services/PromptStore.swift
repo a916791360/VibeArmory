@@ -42,16 +42,9 @@ public class PromptStore: ObservableObject {
            let decoded = try? JSONDecoder().decode([PromptItem].self, from: data),
            !decoded.isEmpty {
             let customItems = decoded.filter { !$0.isPreset }
-            let existingPresetIDs = Set(decoded.filter { $0.isPreset }.map { $0.id })
-            let newPresetIDs = Set(PresetPrompts.items.map { $0.id })
-
-            if existingPresetIDs != newPresetIDs {
-                // Auto-upgrade official presets while preserving user's custom prompts
-                self.items = PresetPrompts.items + customItems
-                save()
-            } else {
-                self.items = decoded
-            }
+            // Always ensure official presets are up to date while preserving custom items
+            self.items = PresetPrompts.items + customItems
+            save()
         } else {
             // First time launch: use presets
             self.items = PresetPrompts.items
@@ -113,6 +106,14 @@ public class PromptStore: ObservableObject {
         if let index = items.firstIndex(where: { $0.id == id }) {
             items[index].usageCount += 1
             save()
+        }
+    }
+
+    public func count(for category: PromptCategory) -> Int {
+        if category == .all {
+            return items.count
+        } else {
+            return items.filter { $0.category == category }.count
         }
     }
 }

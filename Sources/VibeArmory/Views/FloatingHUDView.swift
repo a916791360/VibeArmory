@@ -19,33 +19,29 @@ public struct FloatingHUDView: View {
             )
             .ignoresSafeArea()
 
-            // Layer 2: Main HUD Content
-            VStack(spacing: 0) {
-                // Top Search & Title Bar
-                headerView
-                    .padding(.horizontal, 18)
-                    .padding(.top, 16)
-                    .padding(.bottom, 12)
+            // Layer 2: Main Two-Column Layout (macOS Native Sidebar + Content)
+            HStack(spacing: 0) {
+                // Column 1: Left Sidebar Navigation
+                sidebarView
 
-                // Category Filter Pills
-                categoryPills
-                    .padding(.horizontal, 18)
-                    .padding(.bottom, 10)
+                // Vertical Hairline Specular Glass Separator
+                Rectangle()
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color.white.opacity(0.18),
+                                Color(nsColor: .separatorColor).opacity(0.35),
+                                Color.white.opacity(0.06)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .frame(width: 1)
+                    .ignoresSafeArea()
 
-                // Subtle Apple hairline divider
-                Divider()
-                    .background(Color(nsColor: .separatorColor).opacity(0.4))
-
-                // Prompt Cards List
-                cardsList
-
-                Divider()
-                    .background(Color(nsColor: .separatorColor).opacity(0.4))
-
-                // Footer Bar
-                footerView
-                    .padding(.horizontal, 18)
-                    .padding(.vertical, 9)
+                // Column 2: Right Main HUD Content
+                mainContentView
             }
 
             // Layer 3: Inline Detail Overlay (Pure Liquid Glass)
@@ -101,7 +97,7 @@ public struct FloatingHUDView: View {
                     .padding(.top, 16)
             }
         }
-        .frame(width: 650, height: 490)
+        .frame(width: 730, height: 510)
         // Apple Liquid Glass Specular Double-Rim Optics
         .overlay(
             // Primary Glass Chamfer Highlight (1.2px)
@@ -171,18 +167,18 @@ public struct FloatingHUDView: View {
         }
     }
 
-    // MARK: - Subviews
+    // MARK: - Column 1: Left Sidebar
 
-    private var headerView: some View {
-        HStack(spacing: 12) {
-            // 3D Apple Liquid Glass Brand Logo
+    private var sidebarView: some View {
+        VStack(spacing: 0) {
+            // App Brand Header
             HStack(spacing: 8) {
                 if let logoImg = loadLogoImage() {
                     Image(nsImage: logoImg)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .frame(width: 27, height: 27)
-                        .shadow(color: Color.black.opacity(0.28), radius: 3, x: 0, y: 1.5)
+                        .frame(width: 25, height: 25)
+                        .shadow(color: Color.black.opacity(0.35), radius: 3, x: 0, y: 1.5)
                 } else {
                     ZStack {
                         RoundedRectangle(cornerRadius: 7, style: .continuous)
@@ -196,10 +192,153 @@ public struct FloatingHUDView: View {
                 }
 
                 Text("VibeArmory")
-                    .font(.system(size: 14, weight: .bold, design: .default))
+                    .font(.system(size: 13.5, weight: .bold, design: .default))
                     .foregroundColor(.primary)
+
+                Spacer()
+            }
+            .padding(.horizontal, 14)
+            .padding(.top, 16)
+            .padding(.bottom, 12)
+
+            // Category Section Title
+            HStack {
+                Text("战区分类")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundColor(.secondary.opacity(0.75))
+                Spacer()
+                Text("\(store.items.count) 款就绪")
+                    .font(.system(size: 9.5, weight: .semibold, design: .monospaced))
+                    .foregroundColor(.secondary.opacity(0.6))
+            }
+            .padding(.horizontal, 14)
+            .padding(.bottom, 6)
+
+            // Category Vertical List
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(spacing: 3) {
+                    ForEach(PromptCategory.allCases) { cat in
+                        let isSelected = (store.selectedCategory == cat)
+                        let count = store.count(for: cat)
+
+                        Button(action: {
+                            withAnimation(.spring(response: 0.22, dampingFraction: 0.85)) {
+                                store.selectedCategory = cat
+                                selectedIndex = 0
+                            }
+                        }) {
+                            HStack(spacing: 8) {
+                                Image(systemName: cat.icon)
+                                    .font(.system(size: 11, weight: .medium))
+                                    .foregroundColor(isSelected ? .white : cat.color)
+                                    .frame(width: 15)
+
+                                Text(cat.rawValue)
+                                    .font(.system(size: 12, weight: isSelected ? .semibold : .regular))
+                                    .foregroundColor(isSelected ? .white : .primary)
+                                    .lineLimit(1)
+
+                                Spacer()
+
+                                // Badge count
+                                Text("\(count)")
+                                    .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                                    .padding(.horizontal, 5.5)
+                                    .padding(.vertical, 1.5)
+                                    .background(
+                                        isSelected
+                                            ? Color.white.opacity(0.25)
+                                            : Color.primary.opacity(0.06)
+                                    )
+                                    .foregroundColor(isSelected ? .white : .secondary)
+                                    .clipShape(Capsule())
+                            }
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(
+                                Group {
+                                    if isSelected {
+                                        LinearGradient(
+                                            colors: [Color.accentColor, Color.accentColor.opacity(0.85)],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    } else {
+                                        Color.clear
+                                    }
+                                }
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal, 8)
+                .padding(.bottom, 6)
             }
 
+            Spacer(minLength: 0)
+
+            Divider()
+                .background(Color(nsColor: .separatorColor).opacity(0.35))
+
+            // Sidebar Bottom: Add Custom Weapon Action
+            Button(action: {
+                withAnimation(.spring(response: 0.28, dampingFraction: 0.85)) {
+                    isAddingNew = true
+                }
+            }) {
+                HStack(spacing: 6) {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.system(size: 12))
+                        .foregroundColor(.accentColor)
+
+                    Text("新增自定义武器")
+                        .font(.system(size: 11.5, weight: .medium))
+                        .foregroundColor(.primary)
+
+                    Spacer()
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+        }
+        .frame(width: 195)
+        .background(Color(nsColor: .controlBackgroundColor).opacity(0.22))
+    }
+
+    // MARK: - Column 2: Right Main Content
+
+    private var mainContentView: some View {
+        VStack(spacing: 0) {
+            // Search Header Bar
+            searchHeaderView
+                .padding(.horizontal, 14)
+                .padding(.top, 14)
+                .padding(.bottom, 12)
+
+            Divider()
+                .background(Color(nsColor: .separatorColor).opacity(0.35))
+
+            // Cards List
+            cardsList
+
+            Divider()
+                .background(Color(nsColor: .separatorColor).opacity(0.35))
+
+            // Footer Bar
+            footerView
+                .padding(.horizontal, 14)
+                .padding(.vertical, 9)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private var searchHeaderView: some View {
+        HStack(spacing: 8) {
             // Apple Spotlight-style Integrated Search Bar
             HStack(spacing: 8) {
                 Image(systemName: "magnifyingglass")
@@ -236,82 +375,20 @@ public struct FloatingHUDView: View {
             )
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
 
-            // Action Buttons
-            HStack(spacing: 5) {
-                Button(action: {
-                    withAnimation(.spring(response: 0.28, dampingFraction: 0.85)) {
-                        isAddingNew = true
-                    }
-                }) {
-                    Image(systemName: "plus")
-                        .font(.system(size: 12.5, weight: .medium))
-                        .padding(6)
-                        .background(Color(nsColor: .controlBackgroundColor).opacity(0.4))
-                        .overlay(Circle().stroke(Color.white.opacity(0.1), lineWidth: 0.5))
-                        .clipShape(Circle())
-                }
-                .buttonStyle(.plain)
-                .help("新增自定义武器")
-
-                Button(action: {
-                    store.resetToPresets()
-                    showToast("已重置为官方预置武器库")
-                }) {
-                    Image(systemName: "arrow.counterclockwise")
-                        .font(.system(size: 11.5, weight: .medium))
-                        .padding(6)
-                        .background(Color(nsColor: .controlBackgroundColor).opacity(0.4))
-                        .overlay(Circle().stroke(Color.white.opacity(0.1), lineWidth: 0.5))
-                        .clipShape(Circle())
-                }
-                .buttonStyle(.plain)
-                .help("一键重置为官方预置")
+            // Reset presets button
+            Button(action: {
+                store.resetToPresets()
+                showToast("已重置为官方预置武器库")
+            }) {
+                Image(systemName: "arrow.counterclockwise")
+                    .font(.system(size: 11.5, weight: .medium))
+                    .padding(6.5)
+                    .background(Color(nsColor: .controlBackgroundColor).opacity(0.4))
+                    .overlay(Circle().stroke(Color.white.opacity(0.1), lineWidth: 0.5))
+                    .clipShape(Circle())
             }
-        }
-    }
-
-    private var categoryPills: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 6.5) {
-                ForEach(PromptCategory.allCases) { cat in
-                    let isSelected = (store.selectedCategory == cat)
-                    Button(action: {
-                        withAnimation(.spring(response: 0.24, dampingFraction: 0.82)) {
-                            store.selectedCategory = cat
-                            selectedIndex = 0
-                        }
-                    }) {
-                        HStack(spacing: 4.5) {
-                            Image(systemName: cat.icon)
-                                .font(.system(size: 9.5))
-                            Text(cat.rawValue)
-                                .font(.system(size: 11.5, weight: isSelected ? .semibold : .regular))
-                        }
-                        .padding(.horizontal, 10.5)
-                        .padding(.vertical, 4.5)
-                        .background(
-                            Group {
-                                if isSelected {
-                                    Color.accentColor
-                                } else {
-                                    Color(nsColor: .controlBackgroundColor).opacity(0.35)
-                                }
-                            }
-                        )
-                        .foregroundColor(isSelected ? .white : .primary)
-                        .overlay(
-                            Capsule()
-                                .stroke(
-                                    isSelected ? Color.white.opacity(0.3) : Color.white.opacity(0.08),
-                                    lineWidth: 0.8
-                                )
-                        )
-                        .clipShape(Capsule())
-                        .shadow(color: isSelected ? Color.accentColor.opacity(0.35) : Color.clear, radius: 4, x: 0, y: 2)
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
+            .buttonStyle(.plain)
+            .help("一键重置为官方预置武器库")
         }
     }
 
@@ -325,11 +402,11 @@ public struct FloatingHUDView: View {
                             Image(systemName: "tray")
                                 .font(.system(size: 32, weight: .light))
                                 .foregroundColor(.secondary)
-                            Text("未找到匹配的痛点武器")
+                            Text("未在该战区找到匹配武器")
                                 .font(.system(size: 13))
                                 .foregroundColor(.secondary)
                         }
-                        .frame(maxWidth: .infinity, minHeight: 220)
+                        .frame(maxWidth: .infinity, minHeight: 240)
                     } else {
                         ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                             PromptCardView(
@@ -356,8 +433,8 @@ public struct FloatingHUDView: View {
                         }
                     }
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 9)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 8)
             }
             .onChange(of: selectedIndex) { newIndex in
                 let items = store.filteredItems
@@ -440,7 +517,7 @@ public struct FloatingHUDView: View {
             showingDetailItem = nil
             return
         }
-        guard showingEditItem == nil && !isAddingNew else { return }
+
         let items = store.filteredItems
         if selectedIndex >= 0 && selectedIndex < items.count {
             copyItem(items[selectedIndex])
@@ -461,43 +538,45 @@ public struct FloatingHUDView: View {
                 isAddingNew = false
             }
         } else {
-            FloatingPanelController.shared.hide(restoreFocus: true)
+            NotificationCenter.default.post(name: .vibeArmoryToggleRequested, object: nil)
         }
     }
-
-    private func loadLogoImage() -> NSImage? {
-        if let bundlePath = Bundle.main.path(forResource: "AppLogo", ofType: "png"),
-           let img = NSImage(contentsOfFile: bundlePath) {
-            return img
-        }
-        let execURL = Bundle.main.bundleURL.appendingPathComponent("Contents/Resources/AppLogo.png")
-        if let img = NSImage(contentsOf: execURL) {
-            return img
-        }
-        let projectPath = "Sources/VibeArmory/Resources/AppLogo.png"
-        if FileManager.default.fileExists(atPath: projectPath),
-           let img = NSImage(contentsOfFile: projectPath) {
-            return img
-        }
-        return nil
-    }
-
-    // MARK: - Actions
 
     private func copyItem(_ item: PromptItem) {
         ClipboardManager.shared.copy(prompt: item)
         store.incrementUsage(id: item.id)
-        showToast("已装弹至剪贴板 · 切回 Agent 直接 ⌘V")
+        showToast("已装填: \(item.title)")
+        NotificationCenter.default.post(name: .vibeArmoryPromptCopied, object: nil)
     }
 
-    private func showToast(_ msg: String) {
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-            toastMessage = msg
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-            withAnimation(.easeInOut(duration: 0.2)) {
-                toastMessage = nil
+    private func showToast(_ message: String) {
+        toastMessage = message
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) {
+            if toastMessage == message {
+                withAnimation(.easeOut(duration: 0.22)) {
+                    toastMessage = nil
+                }
             }
         }
+    }
+
+    private func loadLogoImage() -> NSImage? {
+        if let appIcon = NSImage(named: "AppIcon") {
+            return appIcon
+        }
+
+        let possiblePaths = [
+            Bundle.main.bundlePath + "/Contents/Resources/AppLogo.png",
+            Bundle.main.bundlePath + "/Contents/Resources/AppIcon.icns",
+            FileManager.default.currentDirectoryPath + "/Sources/VibeArmory/Resources/AppLogo.png"
+        ]
+
+        for path in possiblePaths {
+            if FileManager.default.fileExists(atPath: path),
+               let img = NSImage(contentsOfFile: path) {
+                return img
+            }
+        }
+        return nil
     }
 }

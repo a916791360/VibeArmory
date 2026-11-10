@@ -30,48 +30,33 @@ public struct DetailSheetView: View {
 
                     Spacer()
 
-                    Text("按 ⎋ 返回 · 按 ↵ 装弹")
+                    Text("按 Esc 返回 · 按 ↵ 装弹")
                         .font(.system(size: 11))
                         .foregroundColor(.secondary)
                 }
 
                 // Title & Symptom card
-                HStack(spacing: 12) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 11, style: .continuous)
-                            .fill(Color.accentColor.opacity(0.18))
-                            .frame(width: 42, height: 42)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 11, style: .continuous)
-                                    .stroke(Color.white.opacity(0.2), lineWidth: 0.8)
-                            )
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 8) {
+                        Text(item.title)
+                            .font(.system(size: 16, weight: .bold))
 
-                        Image(systemName: item.icon)
-                            .font(.system(size: 19, weight: .bold))
-                            .foregroundColor(.accentColor)
+                        Text(item.category.rawValue)
+                            .font(.system(size: 10.5, weight: .medium))
+                            .padding(.horizontal, 7)
+                            .padding(.vertical, 2)
+                            .background(Color.primary.opacity(0.06))
+                            .clipShape(Capsule())
+
+                        Spacer()
                     }
 
-                    VStack(alignment: .leading, spacing: 3) {
-                        HStack(spacing: 7) {
-                            Text(item.title)
-                                .font(.system(size: 16, weight: .bold))
-
-                            Text(item.category.rawValue)
-                                .font(.system(size: 10.5, weight: .medium))
-                                .padding(.horizontal, 7)
-                                .padding(.vertical, 2)
-                                .background(Color.primary.opacity(0.06))
-                                .clipShape(Capsule())
-                        }
-
-                        Text("痛点症状：\(item.symptom)")
-                            .font(.system(size: 12))
-                            .foregroundColor(.secondary)
-                    }
-
-                    Spacer()
+                    Text("痛点症状：\(item.symptom)")
+                        .font(.system(size: 12))
+                        .foregroundColor(.secondary)
                 }
                 .padding(13)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Color(nsColor: .controlBackgroundColor).opacity(0.35))
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 .overlay(

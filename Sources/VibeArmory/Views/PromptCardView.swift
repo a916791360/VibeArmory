@@ -163,15 +163,6 @@ public struct PromptCardView: View {
     }
 
     private var badgeColor: Color {
-        switch item.category {
-        case .all: return .purple
-        case .architecture: return .blue
-        case .debug: return .green
-        case .rules: return .orange
-        case .visual: return .pink
-        case .alignment: return .indigo
-        case .learning: return .teal
-        case .custom: return .yellow
-        }
+        item.category.color
     }
 }

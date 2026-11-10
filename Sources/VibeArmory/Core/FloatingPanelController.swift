@@ -25,7 +25,7 @@ public class FloatingPanelController: NSObject, NSWindowDelegate {
 
         let hostingView = NSHostingView(rootView: hudView)
 
-        let initialRect = NSRect(x: 0, y: 0, width: 650, height: 490)
+        let initialRect = NSRect(x: 0, y: 0, width: 730, height: 510)
         let panel = FloatingPanel(contentRect: initialRect)
         panel.contentView = hostingView
         panel.delegate = self
