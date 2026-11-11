@@ -9,6 +9,7 @@ public class FloatingPanelController: NSObject, NSWindowDelegate {
     private var panel: FloatingPanel?
     private var previousApp: NSRunningApplication?
     private var cancellables = Set<AnyCancellable>()
+    private var lastShowTime: Date = .distantPast
 
     public var isVisible: Bool {
         panel?.isVisible ?? false
@@ -59,6 +60,7 @@ public class FloatingPanelController: NSObject, NSWindowDelegate {
     }
 
     public func show() {
+        lastShowTime = Date()
         guard let panel = panel else {
             setup()
             show()
@@ -110,8 +112,12 @@ public class FloatingPanelController: NSObject, NSWindowDelegate {
 
     // Auto hide when clicking outside to another application
     public func windowDidResignKey(_ notification: Notification) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
             guard let self = self else { return }
+            // Ignore resignKey events within 0.35s of showing, preventing spurious hide from accessory activation
+            if Date().timeIntervalSince(self.lastShowTime) < 0.35 {
+                return
+            }
             if let frontApp = NSWorkspace.shared.frontmostApplication,
                frontApp.bundleIdentifier != Bundle.main.bundleIdentifier,
                self.panel?.isKeyWindow == false {

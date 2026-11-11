@@ -9,6 +9,8 @@ public struct DetailSheetView: View {
         ZStack {
             VisualEffectView(material: .popover, blendingMode: .behindWindow, state: .active)
                 .ignoresSafeArea()
+            Color(nsColor: .controlBackgroundColor).opacity(0.55)
+                .ignoresSafeArea()
 
             VStack(alignment: .leading, spacing: 14) {
                 // Header with back button
@@ -35,33 +37,40 @@ public struct DetailSheetView: View {
                         .foregroundColor(.secondary)
                 }
 
-                // Title & Symptom card
-                VStack(alignment: .leading, spacing: 4) {
+                // Title & Symptom card (Matching Liquid Glass Style)
+                VStack(alignment: .leading, spacing: 6) {
                     HStack(spacing: 8) {
                         Text(item.title)
-                            .font(.system(size: 16, weight: .bold))
+                            .font(.system(size: 15.5, weight: .bold))
+                            .foregroundColor(.primary)
 
                         Text(item.category.rawValue)
-                            .font(.system(size: 10.5, weight: .medium))
-                            .padding(.horizontal, 7)
-                            .padding(.vertical, 2)
-                            .background(Color.primary.opacity(0.06))
+                            .font(.system(size: 10.5, weight: .semibold))
+                            .foregroundColor(item.category.color)
+                            .padding(.horizontal, 7.5)
+                            .padding(.vertical, 2.5)
+                            .background(item.category.color.opacity(0.12))
                             .clipShape(Capsule())
 
                         Spacer()
                     }
 
-                    Text("痛点症状：\(item.symptom)")
-                        .font(.system(size: 12))
-                        .foregroundColor(.secondary)
+                    HStack(alignment: .top, spacing: 4) {
+                        Text("痛点症状：")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.secondary)
+                        Text(item.symptom)
+                            .font(.system(size: 12))
+                            .foregroundColor(.primary.opacity(0.85))
+                    }
                 }
-                .padding(13)
+                .padding(14)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color(nsColor: .controlBackgroundColor).opacity(0.35))
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .background(Color(nsColor: .controlBackgroundColor).opacity(0.5))
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .stroke(Color.white.opacity(0.1), lineWidth: 0.8)
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(Color.primary.opacity(0.08), lineWidth: 0.8)
                 )
 
                 // Content preview (expands nicely)
@@ -84,11 +93,11 @@ public struct DetailSheetView: View {
                             .padding(14)
                             .textSelection(.enabled)
                     }
-                    .background(Color.black.opacity(0.22))
+                    .background(Color(nsColor: .controlBackgroundColor).opacity(0.5))
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                     .overlay(
                         RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .stroke(Color.white.opacity(0.08), lineWidth: 0.8)
+                            .stroke(Color.primary.opacity(0.08), lineWidth: 0.8)
                     )
                 }
 
@@ -99,15 +108,6 @@ public struct DetailSheetView: View {
                         .foregroundColor(.secondary)
 
                     Spacer()
-
-                    Button("返回 (Esc)") {
-                        onDismiss()
-                    }
-                    .buttonStyle(.plain)
-                    .padding(.horizontal, 13)
-                    .padding(.vertical, 6)
-                    .background(Color(nsColor: .controlBackgroundColor).opacity(0.35))
-                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
 
                     Button(action: {
                         onCopy()
@@ -131,6 +131,6 @@ public struct DetailSheetView: View {
             }
             .padding(18)
         }
-        .frame(width: 650, height: 490)
+        .frame(width: 730, height: 510)
     }
 }

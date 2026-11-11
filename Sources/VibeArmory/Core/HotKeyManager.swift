@@ -7,11 +7,38 @@ public class HotKeyManager {
     private var hotKeyRef: EventHotKeyRef?
     private var eventHandler: EventHandlerRef?
     private let hotKeyID = EventHotKeyID(signature: OSType(0x5641524D), id: 1) // 'VARM' for VibeArmory
+    private let userDefaultsKey = "VibeArmory_SavedHotKey"
 
-    private init() {}
+    public private(set) var currentOption: HotKeyOption = .optionP
+
+    public var currentKeyDisplayString: String {
+        currentOption.displayString
+    }
+
+    private init() {
+        loadSavedHotKey()
+    }
 
     public func setup() {
         registerHotKey()
+    }
+
+    private func loadSavedHotKey() {
+        if let data = UserDefaults.standard.data(forKey: userDefaultsKey),
+           let saved = try? JSONDecoder().decode(HotKeyOption.self, from: data) {
+            self.currentOption = saved
+        } else {
+            self.currentOption = .optionP
+        }
+    }
+
+    public func updateHotKey(_ option: HotKeyOption) {
+        self.currentOption = option
+        if let data = try? JSONEncoder().encode(option) {
+            UserDefaults.standard.set(data, forKey: userDefaultsKey)
+        }
+        registerHotKey()
+        NotificationCenter.default.post(name: .vibeArmoryHotKeyChanged, object: option)
     }
 
     public func registerHotKey() {
@@ -38,11 +65,9 @@ public class HotKeyManager {
             &eventHandler
         )
 
-        // Register Option + P (keyCode 35 is 'P')
-        // optionKey in Carbon is (1 << 11) = 2048
         let status = RegisterEventHotKey(
-            UInt32(kVK_ANSI_P),
-            UInt32(optionKey),
+            currentOption.keyCode,
+            currentOption.carbonModifiers,
             hotKeyID,
             GetApplicationEventTarget(),
             0,
@@ -50,8 +75,7 @@ public class HotKeyManager {
         )
 
         if status != noErr {
-            print("VibeArmory: Failed to register Option+P hotkey. Status: \(status). Trying Cmd+Option+P...")
-            // Fallback to Cmd + Option + P
+            print("VibeArmory: Failed to register hotkey \(currentOption.displayString). Status: \(status). Falling back to Cmd+Option+P...")
             _ = RegisterEventHotKey(
                 UInt32(kVK_ANSI_P),
                 UInt32(cmdKey | optionKey),

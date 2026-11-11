@@ -44,6 +44,15 @@ public class FloatingPanel: NSPanel {
             case 53: // Esc
                 NotificationCenter.default.post(name: .vibeArmoryDismissOrBack, object: nil)
                 return
+            case 43 where event.modifierFlags.contains(.command): // Command + , (Preferences)
+                NotificationCenter.default.post(name: .vibeArmoryOpenSettingsRequested, object: "settings")
+                return
+            case 45 where event.modifierFlags.contains(.command): // Command + N (New Custom Weapon)
+                NotificationCenter.default.post(name: .vibeArmoryOpenSettingsRequested, object: "add")
+                return
+            case 34 where event.modifierFlags.contains(.command): // Command + I (Get Info / Detail)
+                NotificationCenter.default.post(name: .vibeArmoryOpenSettingsRequested, object: "detail")
+                return
             default:
                 break
             }

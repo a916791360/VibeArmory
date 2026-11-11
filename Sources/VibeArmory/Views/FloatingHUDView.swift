@@ -7,7 +7,9 @@ public struct FloatingHUDView: View {
     @State private var showingDetailItem: PromptItem?
     @State private var showingEditItem: PromptItem?
     @State private var isAddingNew = false
+    @State private var showingSettings = false
     @State private var toastMessage: String?
+    @State private var currentHotKeyDisplay = HotKeyManager.shared.currentKeyDisplayString
 
     public var body: some View {
         ZStack {
@@ -89,6 +91,20 @@ public struct FloatingHUDView: View {
                 .zIndex(5)
             }
 
+            // Layer 4.5: Inline Preferences & Hotkey Settings Overlay
+            if showingSettings {
+                SettingsView {
+                    withAnimation(.spring(response: 0.28, dampingFraction: 0.85)) {
+                        showingSettings = false
+                    }
+                }
+                .transition(.asymmetric(
+                    insertion: .move(edge: .trailing).combined(with: .opacity),
+                    removal: .move(edge: .trailing).combined(with: .opacity)
+                ))
+                .zIndex(6)
+            }
+
             // Layer 5: Toast Overlay
             if let msg = toastMessage {
                 ToastView(message: msg)
@@ -153,11 +169,26 @@ public struct FloatingHUDView: View {
             handleDismissOrBack()
         }
         .onReceive(NotificationCenter.default.publisher(for: .vibeArmoryOpenSettingsRequested)) { notif in
-            if (notif.object as? String) == "add" {
+            let action = notif.object as? String
+            if action == "settings" {
+                withAnimation(.spring(response: 0.28, dampingFraction: 0.85)) {
+                    showingSettings = true
+                }
+            } else if action == "add" {
                 withAnimation(.spring(response: 0.28, dampingFraction: 0.85)) {
                     isAddingNew = true
                 }
+            } else if action == "detail" {
+                withAnimation(.spring(response: 0.28, dampingFraction: 0.85)) {
+                    if !store.filteredItems.isEmpty {
+                        let idx = max(0, min(selectedIndex, store.filteredItems.count - 1))
+                        showingDetailItem = store.filteredItems[idx]
+                    }
+                }
             }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .vibeArmoryHotKeyChanged)) { _ in
+            currentHotKeyDisplay = HotKeyManager.shared.currentKeyDisplayString
         }
         .onChange(of: store.searchText) { _ in
             selectedIndex = 0
@@ -291,7 +322,7 @@ public struct FloatingHUDView: View {
             }) {
                 HStack(spacing: 6) {
                     Image(systemName: "plus.circle.fill")
-                        .font(.system(size: 12))
+                        .font(.system(size: 11.5))
                         .foregroundColor(.accentColor)
 
                     Text("新增自定义武器")
@@ -301,7 +332,7 @@ public struct FloatingHUDView: View {
                     Spacer()
                 }
                 .padding(.horizontal, 14)
-                .padding(.vertical, 10)
+                .frame(height: 38)
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
@@ -331,8 +362,8 @@ public struct FloatingHUDView: View {
 
             // Footer Bar
             footerView
-                .padding(.horizontal, 14)
-                .padding(.vertical, 9)
+                .padding(.horizontal, 16)
+                .frame(height: 38)
         }
         .frame(maxWidth: .infinity)
     }
@@ -358,7 +389,7 @@ public struct FloatingHUDView: View {
                     .buttonStyle(.plain)
                 }
 
-                Text("⌥P")
+                Text(currentHotKeyDisplay)
                     .font(.system(size: 10, weight: .semibold, design: .monospaced))
                     .padding(.horizontal, 5)
                     .padding(.vertical, 2)
@@ -375,12 +406,13 @@ public struct FloatingHUDView: View {
             )
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
 
-            // Reset presets button
+            // Action Button: Settings
             Button(action: {
-                store.resetToPresets()
-                showToast("已重置为官方预置武器库")
+                withAnimation(.spring(response: 0.28, dampingFraction: 0.85)) {
+                    showingSettings = true
+                }
             }) {
-                Image(systemName: "arrow.counterclockwise")
+                Image(systemName: "gearshape.fill")
                     .font(.system(size: 11.5, weight: .medium))
                     .padding(6.5)
                     .background(Color(nsColor: .controlBackgroundColor).opacity(0.4))
@@ -388,7 +420,7 @@ public struct FloatingHUDView: View {
                     .clipShape(Circle())
             }
             .buttonStyle(.plain)
-            .help("一键重置为官方预置武器库")
+            .help("偏好设置 (⌘,)")
         }
     }
 
@@ -427,6 +459,9 @@ public struct FloatingHUDView: View {
                                     withAnimation(.spring(response: 0.28, dampingFraction: 0.85)) {
                                         showingEditItem = item
                                     }
+                                },
+                                onDelete: {
+                                    deleteCustomItem(item)
                                 }
                             )
                             .id(item.id)
@@ -497,7 +532,7 @@ public struct FloatingHUDView: View {
     // MARK: - Keyboard Handling
 
     private func handleMoveDown() {
-        guard showingDetailItem == nil && showingEditItem == nil && !isAddingNew else { return }
+        guard showingDetailItem == nil && showingEditItem == nil && !isAddingNew && !showingSettings else { return }
         let total = store.filteredItems.count
         if total > 0 {
             selectedIndex = min(selectedIndex + 1, total - 1)
@@ -505,7 +540,7 @@ public struct FloatingHUDView: View {
     }
 
     private func handleMoveUp() {
-        guard showingDetailItem == nil && showingEditItem == nil && !isAddingNew else { return }
+        guard showingDetailItem == nil && showingEditItem == nil && !isAddingNew && !showingSettings else { return }
         if store.filteredItems.count > 0 {
             selectedIndex = max(selectedIndex - 1, 0)
         }
@@ -525,7 +560,11 @@ public struct FloatingHUDView: View {
     }
 
     private func handleDismissOrBack() {
-        if showingDetailItem != nil {
+        if showingSettings {
+            withAnimation(.spring(response: 0.28, dampingFraction: 0.85)) {
+                showingSettings = false
+            }
+        } else if showingDetailItem != nil {
             withAnimation(.spring(response: 0.28, dampingFraction: 0.85)) {
                 showingDetailItem = nil
             }
@@ -546,7 +585,18 @@ public struct FloatingHUDView: View {
         ClipboardManager.shared.copy(prompt: item)
         store.incrementUsage(id: item.id)
         showToast("已装填: \(item.title)")
-        NotificationCenter.default.post(name: .vibeArmoryPromptCopied, object: nil)
+    }
+
+    private func deleteCustomItem(_ item: PromptItem) {
+        guard !item.isPreset else { return }
+        withAnimation(.spring(response: 0.28, dampingFraction: 0.85)) {
+            store.delete(id: item.id)
+            let count = store.filteredItems.count
+            if selectedIndex >= count {
+                selectedIndex = max(0, count - 1)
+            }
+        }
+        showToast("已删除自定义武器: \(item.title)")
     }
 
     private func showToast(_ message: String) {

@@ -7,6 +7,7 @@ public struct PromptCardView: View {
     public let onCopy: () -> Void
     public let onDetail: () -> Void
     public let onEdit: () -> Void
+    public let onDelete: () -> Void
 
     @State private var isHovered = false
 
@@ -127,6 +128,27 @@ public struct PromptCardView: View {
         .onTapGesture {
             onSelect()
             onCopy()
+        }
+        .contextMenu {
+            if !item.isPreset {
+                Button(role: .destructive, action: onDelete) {
+                    Label("删除该武器", systemImage: "trash")
+                }
+
+                Button(action: onEdit) {
+                    Label("编辑该武器...", systemImage: "pencil")
+                }
+
+                Divider()
+            }
+
+            Button(action: onDetail) {
+                Label("查看完整详情", systemImage: "eye")
+            }
+
+            Button(action: onCopy) {
+                Label("立即装弹 (复制)", systemImage: "bolt.fill")
+            }
         }
     }
 

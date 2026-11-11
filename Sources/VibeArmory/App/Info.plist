@@ -24,5 +24,16 @@
     <true/>
     <key>NSHighResolutionCapable</key>
     <true/>
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>com.qingmeng.VibeArmory</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>vibearmory</string>
+            </array>
+        </dict>
+    </array>
 </dict>
 </plist>
