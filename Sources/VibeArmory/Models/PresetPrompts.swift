@@ -166,7 +166,7 @@ public enum PresetPrompts {
         // MARK: - 2. 💥 越改越乱 (Cascading Chaos & Spaghetti)
         PromptItem(
             id: UUID(uuidString: "C0000004-0000-0000-0000-000000000004")!,
-            title: "第一性原理降维重构（打地鼠终止器）",
+            title: "第一性原理降维重构",
             symptom: "越改越烂、打地鼠死循环、改了 A 坏了 B、屎山代码不敢碰",
             category: .refactor,
             promptContent: """
@@ -196,7 +196,7 @@ public enum PresetPrompts {
 
         PromptItem(
             id: UUID(uuidString: "C0000005-0000-0000-0000-000000000005")!,
-            title: "跨领域机制借解（系统模式迁移）",
+            title: "跨领域机制借解",
             symptom: "业务逻辑极其臃肿、常规套路陷入死胡同、设计出来的逻辑极不优雅",
             category: .refactor,
             promptContent: """
