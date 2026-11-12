@@ -304,7 +304,7 @@ public struct SettingsView: View {
                         Text("VibeArmory · Vibe 军火库")
                             .font(.system(size: 14, weight: .bold))
 
-                        Text("v0.1.3")
+                        Text("v0.1.4")
                             .font(.system(size: 10.5, weight: .semibold, design: .monospaced))
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)

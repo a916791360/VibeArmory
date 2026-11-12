@@ -1,11 +1,11 @@
 #!/bin/bash
 set -e
 
-echo "🚀 Building VibeArmory Release..."
+echo "🚀 Building VibeArmory Universal Release (Apple Silicon + Intel)..."
 cd "$(dirname "$0")/.."
 
-# 1. Swift release build
-swift build -c release
+# 1. Swift release build for both arm64 and x86_64
+swift build -c release --arch arm64 --arch x86_64
 
 # 2. Prepare .app bundle structure
 APP_DIR="dist/VibeArmory.app"
@@ -18,7 +18,11 @@ mkdir -p "$MACOS_DIR"
 mkdir -p "$RESOURCES_DIR"
 
 # 3. Copy binary, plist, and assets
-cp .build/release/VibeArmory "$MACOS_DIR/VibeArmory"
+if [ -f ".build/apple/Products/Release/VibeArmory" ]; then
+    cp .build/apple/Products/Release/VibeArmory "$MACOS_DIR/VibeArmory"
+else
+    cp .build/release/VibeArmory "$MACOS_DIR/VibeArmory"
+fi
 chmod +x "$MACOS_DIR/VibeArmory"
 
 cp Sources/VibeArmory/App/Info.plist "$CONTENTS_DIR/Info.plist"
@@ -37,5 +41,12 @@ if command -v codesign &> /dev/null; then
     codesign -s - --force --deep "$APP_DIR"
 fi
 
+# 5. Create distribution zip preserving macOS metadata, permissions, and signatures
+ZIP_NAME="dist/VibeArmory-v0.1.4-macOS-Universal.zip"
+rm -f "$ZIP_NAME"
+echo "📦 Packaging distribution archive: $ZIP_NAME..."
+ditto -c -k --sequesterRsrc --keepParent "$APP_DIR" "$ZIP_NAME"
+
 echo "✅ Build complete! App located at: $(pwd)/$APP_DIR"
+echo "📦 Distribution zip located at: $(pwd)/$ZIP_NAME"
 echo "👉 You can run it with: open '$APP_DIR'"
