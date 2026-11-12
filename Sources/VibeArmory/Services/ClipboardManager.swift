@@ -21,17 +21,11 @@ public class ClipboardManager {
         pasteboard.clearContents()
         pasteboard.setString(prompt.promptContent, forType: .string)
 
-        let playSound = UserDefaults.standard.object(forKey: "VibeArmory_PlaySoundOnCopy") as? Bool ?? true
-        if playSound {
-            // Haptic feedback
-            NSHapticFeedbackManager.defaultPerformer.perform(
-                .generic,
-                performanceTime: .now
-            )
-
-            // Subtle system audio cue
-            NSSound(named: "Tink")?.play()
-        }
+        // Subtle trackpad tactile feedback (silent & refined)
+        NSHapticFeedbackManager.defaultPerformer.perform(
+            .generic,
+            performanceTime: .now
+        )
 
         let autoDismiss = UserDefaults.standard.object(forKey: "VibeArmory_AutoDismissOnCopy") as? Bool ?? true
         if autoDismiss {

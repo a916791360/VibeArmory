@@ -10,7 +10,6 @@ public struct SettingsView: View {
     @State private var eventMonitor: Any?
     @State private var recordHint = "点击录制自定义快捷键"
     @State private var autoDismissOnCopy: Bool = UserDefaults.standard.object(forKey: "VibeArmory_AutoDismissOnCopy") as? Bool ?? true
-    @State private var playSoundOnCopy: Bool = UserDefaults.standard.object(forKey: "VibeArmory_PlaySoundOnCopy") as? Bool ?? true
     @State private var feedbackText: String?
 
     public init(onDismiss: @escaping () -> Void) {
@@ -256,30 +255,6 @@ public struct SettingsView: View {
                         .toggleStyle(.switch)
                         .onChange(of: autoDismissOnCopy) { val in
                             UserDefaults.standard.set(val, forKey: "VibeArmory_AutoDismissOnCopy")
-                        }
-                }
-
-                Divider()
-                    .background(Color(nsColor: .separatorColor).opacity(0.25))
-
-                // Sound feedback
-                HStack(alignment: .center) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("装弹成功播放 macOS 原生微触感音效")
-                            .font(.system(size: 12.5, weight: .medium))
-                            .foregroundColor(.primary)
-                        Text("装填入剪贴板时触发微弱的 Tink 系统音与触觉反馈")
-                            .font(.system(size: 11))
-                            .foregroundColor(.secondary)
-                    }
-
-                    Spacer()
-
-                    Toggle("", isOn: $playSoundOnCopy)
-                        .labelsHidden()
-                        .toggleStyle(.switch)
-                        .onChange(of: playSoundOnCopy) { val in
-                            UserDefaults.standard.set(val, forKey: "VibeArmory_PlaySoundOnCopy")
                         }
                 }
             }
