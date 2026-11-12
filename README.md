@@ -1,9 +1,13 @@
+<p align="center">
+  <img src="Resources/AppIcon.png" width="128" height="128" alt="VibeArmory App Icon" />
+</p>
+
 # ⚡️ VibeArmory (Vibe 军火库)
 
 <p align="center">
   <img src="https://img.shields.io/badge/Language-Swift%206-orange.svg" alt="Swift 6">
   <img src="https://img.shields.io/badge/Platform-macOS%2013.0%2B-blue.svg" alt="macOS 13+">
-  <img src="https://img.shields.io/badge/Architecture-Apple%20Silicon%20%2F%20Intel-green.svg" alt="Architecture">
+  <img src="https://img.shields.io/badge/Architecture-Universal%20(Apple%20Silicon%20%2B%20Intel)-green.svg" alt="Universal Architecture">
   <img src="https://img.shields.io/badge/Dependencies-Zero%20(Pure%20Native)-success.svg" alt="Zero Dependencies">
   <img src="https://img.shields.io/badge/License-MIT-purple.svg" alt="License">
 </p>
