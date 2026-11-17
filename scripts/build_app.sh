@@ -42,7 +42,7 @@ if command -v codesign &> /dev/null; then
 fi
 
 # 5. Create distribution zip preserving macOS metadata, permissions, and signatures
-ZIP_NAME="dist/VibeArmory-v0.1.4-macOS-Universal.zip"
+ZIP_NAME="dist/VibeArmory-v0.1.5-macOS-Universal.zip"
 rm -f "$ZIP_NAME"
 echo "📦 Packaging distribution archive: $ZIP_NAME..."
 ditto -c -k --sequesterRsrc --keepParent "$APP_DIR" "$ZIP_NAME"
